@@ -197,6 +197,7 @@ docs/whitepaper.md  July 2026 spec
 examples/           open the gate and write HTML
 workers/download-tracker/   Cloudflare Worker + wrangler.toml
 CONTRIBUTING.md     forks are first-class
+mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
 ## License
