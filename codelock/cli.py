@@ -4,6 +4,7 @@
     codelock open-gate --ack "This tool alters perception, not meaning."
     codelock render --in FILE --mode normalize|codelock --out FILE.html [--seed N] [--hue/--no-hue] [--ack "..."]
     codelock export --in FILE --kind normal|codelock --out FILE [--seed N] [--ack "..."]
+    codelock ui [--host 127.0.0.1] [--port 8762]
     codelock version
 
 The gate is per-invocation. Pass ``--ack`` or set env ``CODELOCK_ACK`` to
@@ -95,6 +96,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     sub.add_parser("version", help="Print the CodeLock version and exit.")
+
+    p_ui = sub.add_parser("ui", help="Run the localhost UI (127.0.0.1:8762).")
+    p_ui.add_argument("--host", default="127.0.0.1", help="Bind host (default 127.0.0.1).")
+    p_ui.add_argument("--port", type=int, default=8762, help="Bind port (default 8762).")
     return parser
 
 
@@ -142,6 +147,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.cmd == "version":
         sys.stdout.write(f"codelock {__version__}\n")
+        return 0
+
+    if args.cmd == "ui":
+        from codelock.ui import serve
+
+        serve(host=args.host, port=args.port)
         return 0
 
     if args.cmd == "gate-status":

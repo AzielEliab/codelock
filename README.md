@@ -38,6 +38,13 @@ Direct tarball (also counted): [codelock-0.1.0.tar.gz](https://codelock-download
 
 ---
 
+
+## Local UI
+
+`codelock ui` serves a loopback dashboard at http://127.0.0.1:8762
+
+Binds to `127.0.0.1` only. Self-contained HTML (no CDN). Paste or load a snippet, run Normalize vs CodeLock Mode. Gate phrase is on the page.
+
 ## What it does
 
 CodeLock applies reversible, non-destructive rendering transformations
@@ -106,6 +113,7 @@ codelock export --in snippet.py --kind codelock --out snippet.codelock.html \
   --seed 7 --ack "This tool alters perception, not meaning."
 
 codelock version
+codelock ui            # localhost UI on 127.0.0.1:8762
 ```
 
 `--ack` (or env `CODELOCK_ACK` set to the same phrase) opens the gate
