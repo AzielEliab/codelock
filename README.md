@@ -200,6 +200,33 @@ CONTRIBUTING.md     forks are first-class
 mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
+## Use with Grok, ChatGPT, Venice
+
+Live HTTPS runtime on the download-tracker Worker (does **not** increment the download counter):
+
+- OpenAPI 3.1: https://codelock-download-tracker.vibelock.workers.dev/openapi.json
+- Health: https://codelock-download-tracker.vibelock.workers.dev/v1/health
+- How to wire tools: https://codelock-download-tracker.vibelock.workers.dev/ai
+- MCP catalog: https://aziel-runtime.vibelock.workers.dev/mcp
+
+POST /v1/gate-status and POST /v1/render {source, mode: normalize|codelock, ack}. Gate phrase (exact): `This tool alters perception, not meaning.` Without ack, CodeLock mode refuses. Source is never mutated. Not encryption.
+
+**ChatGPT Actions:** GPT Editor → Actions → Import from URL → `https://codelock-download-tracker.vibelock.workers.dev/openapi.json` (no auth).
+
+**Grok / xAI tools:** add an HTTP/OpenAPI tool pointing at `https://codelock-download-tracker.vibelock.workers.dev/openapi.json`.
+
+**Venice HTTP tools:** add an HTTP tool with method, URL, and JSON body from that spec. Start with GET `https://codelock-download-tracker.vibelock.workers.dev/v1/health`.
+
+```bash
+curl -sS https://codelock-download-tracker.vibelock.workers.dev/v1/health
+curl -sS -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/render \
+  -H 'content-type: application/json' \
+  -d '{"source":"print(1)","mode":"normalize"}'
+```
+
+GET `/download` still serves the gzip tarball and is counted.
+
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
