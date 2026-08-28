@@ -13,6 +13,21 @@ How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Forks are welcome and always allowed.**
 
+## Quick start
+
+```bash
+python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
+codelock ui
+```
+
+Open http://127.0.0.1:8762 (loopback only). No CDN, no telemetry.
+
+Counted download: [https://codelock-download-tracker.vibelock.workers.dev/](https://codelock-download-tracker.vibelock.workers.dev/)
+
+Editor-tether (not a keylogger): `codelock watch PATH` or pipe from vim/vscode (`:w !codelock watch -`).
+
+
+
 CodeLock is **not encryption**. It does not hide, obfuscate, protect
 secrets, prevent copying, or replace a cipher. Plain text is always
 canonical. Rendered views never mutate source.
@@ -44,6 +59,22 @@ Direct tarball (also counted): [codelock-0.1.0.tar.gz](https://codelock-download
 `codelock ui` serves a loopback dashboard at http://127.0.0.1:8762
 
 Binds to `127.0.0.1` only. Self-contained HTML (no CDN). Paste or load a snippet, run Normalize vs CodeLock Mode. Gate phrase is on the page.
+
+
+## iPhone & Android
+
+Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.codelock`. Offline. No analytics. Dark matte / gold.
+
+Paste source, toggle Normalize vs CodeLock, gate phrase on screen. Not encryption.
+
+```bash
+cd mobile
+flutter create --org com.azieeliab --project-name codelock .
+flutter pub get
+flutter run
+```
+
+The `android/` and `ios/` folders in this tree are skeleton READMEs until you run `flutter create .` (this machine has no Flutter SDK on PATH). Then open `android/` in Android Studio or `ios/Runner.xcworkspace` in Xcode. Not a store listing.
 
 ## What it does
 

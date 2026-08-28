@@ -136,3 +136,44 @@ def test_cli_ack_env(tmp_path: Path, python_snippet: str, monkeypatch) -> None:
     )
     assert rc == 0
     assert out_html.exists()
+
+
+def test_help_lists_ui_and_version() -> None:
+    from codelock.cli import _build_parser
+
+    text = _build_parser().format_help()
+    assert "ui" in text
+    assert "version" in text
+    assert "codelock ui" in text or "127.0.0.1:8762" in text
+    assert "watch" in text
+
+
+def test_cli_watch_file_shows_both_views(tmp_path, python_snippet, capsys) -> None:
+    inp = tmp_path / "snip.py"
+    inp.write_text(python_snippet, encoding="utf-8")
+    rc = main(["watch", str(inp), "--ack", ACK_PHRASE, "--seed", "7"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "pipe from vim/vscode" in out
+    assert "normalize" in out.lower()
+    assert python_snippet.splitlines()[0] in out
+    assert "CodeLock" in out or "codelock" in out.lower()
+    assert "size=" in out
+
+
+def test_cli_watch_stdin_without_ack_keeps_normalize(python_snippet, capsys) -> None:
+    import io
+
+    import codelock.cli as cli_mod
+
+    old = cli_mod.sys.stdin
+    try:
+        cli_mod.sys.stdin = io.StringIO(python_snippet)
+        rc = main(["watch", "-"])
+    finally:
+        cli_mod.sys.stdin = old
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "pipe from vim/vscode" in out
+    assert "gate: closed" in out
+    assert python_snippet.splitlines()[0] in out

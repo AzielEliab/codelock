@@ -1,11 +1,12 @@
 """Command-line interface for CodeLock.
 
+    codelock ui [--host 127.0.0.1] [--port 8762]
+    codelock version
+    codelock watch PATH   # file or - (stdin); pipe from vim/vscode; not a keylogger
     codelock gate-status
     codelock open-gate --ack "This tool alters perception, not meaning."
     codelock render --in FILE --mode normalize|codelock --out FILE.html [--seed N] [--hue/--no-hue] [--ack "..."]
     codelock export --in FILE --kind normal|codelock --out FILE [--seed N] [--ack "..."]
-    codelock ui [--host 127.0.0.1] [--port 8762]
-    codelock version
 
 The gate is per-invocation. Pass ``--ack`` or set env ``CODELOCK_ACK`` to
 the exact acknowledgment phrase. Default is Closed. Normalize and
@@ -31,7 +32,8 @@ def _build_parser() -> argparse.ArgumentParser:
         description=(
             "CodeLock — gate-tethered cognitive rendering of source text "
             "(Aziel Eliab, July 2026). This tool alters perception, not "
-            "meaning. It is not encryption."
+            "meaning. It is not encryption. "
+            "Local UI: `codelock ui` at http://127.0.0.1:8762."
         ),
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -100,6 +102,27 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ui = sub.add_parser("ui", help="Run the localhost UI (127.0.0.1:8762).")
     p_ui.add_argument("--host", default="127.0.0.1", help="Bind host (default 127.0.0.1).")
     p_ui.add_argument("--port", type=int, default=8762, help="Bind port (default 8762).")
+
+    p_watch = sub.add_parser(
+        "watch",
+        help="Editor-tether: watch a file or stdin; show CodeLock vs normalize. Not a keylogger.",
+    )
+    p_watch.add_argument(
+        "path",
+        help="File to render, or - to read stdin (pipe from vim/vscode).",
+    )
+    p_watch.add_argument("--seed", default="0", help="Deterministic seed (default 0).")
+    p_watch.add_argument(
+        "--hue",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Hue spectrum on tokens (default: on).",
+    )
+    p_watch.add_argument(
+        "--ack",
+        default=None,
+        help=f"Exact phrase to open the gate for the CodeLock view: {ACK_PHRASE!r}",
+    )
     return parser
 
 
@@ -141,6 +164,52 @@ def _session(source: str, args: argparse.Namespace) -> CodeLockSession:
     return CodeLockSession(source, seed=seed, hue=hue, gate=gate)
 
 
+
+def _cmd_watch(args: argparse.Namespace) -> int:
+    """One-shot editor tether. Reads a file or stdin. Not a keylogger."""
+    sys.stdout.write("pipe from vim/vscode\n")
+    sys.stdout.write(
+        "Editor-tether: pipe from vim/vscode "
+        "(example: :w !codelock watch -). Not a keylogger.\n"
+    )
+    if args.path == "-":
+        source = sys.stdin.read()
+        label = "<stdin>"
+    else:
+        source = _read_source(args.path)
+        label = args.path
+    try:
+        session = _session(source, args)
+    except AcknowledgmentError as exc:
+        sys.stderr.write(f"error: {exc}\n")
+        return 2
+    sys.stdout.write(f"=== normalize (canonical)  {label} ===\n")
+    sys.stdout.write(session.source)
+    if not session.source.endswith("\n"):
+        sys.stdout.write("\n")
+    sys.stdout.write("=== CodeLock (non-canonical; perception, not meaning) ===\n")
+    if not session.gate_open:
+        sys.stdout.write(
+            "gate: closed — pass --ack "
+            f"{ACK_PHRASE!r} to see the Rosetta view. Normalize is above.\n"
+        )
+        return 0
+    try:
+        tokens = session.tokens()
+        styles = session.styles()
+    except GateClosedError as exc:
+        sys.stderr.write(f"error: {exc}\n")
+        return 2
+    for tok, style in zip(tokens, styles):
+        hue = style.get("hue_deg")
+        hue_s = f" hue={hue}" if hue is not None else ""
+        sys.stdout.write(
+            f"  {tok!r}  size={style['font_size_px']}px  "
+            f"rot={style['rotate_deg']}{hue_s}\n"
+        )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -152,8 +221,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.cmd == "ui":
         from codelock.ui import serve
 
-        serve(host=args.host, port=args.port)
+        try:
+            serve(host=args.host, port=args.port)
+        except ValueError as exc:
+            sys.stderr.write(f"error: {exc}\n")
+            return 2
         return 0
+
+    if args.cmd == "watch":
+        return _cmd_watch(args)
 
     if args.cmd == "gate-status":
         try:
