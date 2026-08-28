@@ -1,0 +1,166 @@
+# CodeLock
+
+Gate-tethered cognitive rendering of source text.
+
+**Author:** Aziel Eliab
+**Date:** July 2026
+**License:** [Apache-2.0](LICENSE)
+
+> This tool alters perception, not meaning.
+
+See the spec: [docs/whitepaper.md](docs/whitepaper.md).
+How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Forks are welcome and always allowed.**
+
+CodeLock is **not encryption**. It does not hide, obfuscate, protect
+secrets, prevent copying, or replace a cipher. Plain text is always
+canonical. Rendered views never mutate source.
+
+---
+
+## Download
+
+**Hosted (Cloudflare Worker, counted across branches and forks):**
+
+# → [https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz](https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz) ←
+
+Direct file: [codelock-0.1.0.tar.gz](https://codelock-download-tracker.vibelock.workers.dev/codelock-0.1.0.tar.gz)
+
+- Tracker home: [https://codelock-download-tracker.vibelock.workers.dev/](https://codelock-download-tracker.vibelock.workers.dev/)
+- Stats: [https://codelock-download-tracker.vibelock.workers.dev/stats](https://codelock-download-tracker.vibelock.workers.dev/stats)
+- GitHub releases: [https://github.com/AzielEliab/codelock/releases](https://github.com/AzielEliab/codelock/releases)
+
+Query params: `owner`, `repo` (`owner/repo` is accepted), `branch`,
+`fork` (`1` or `owner/repo`), `tag`, `asset`. Forks can POST `/event`
+so their downloads are counted separately. See the worker README.
+
+---
+
+## What it does
+
+CodeLock applies reversible, non-destructive rendering transformations
+at the **view layer** so you can see how visual presentation changes
+human comprehension of identical source text.
+
+1. **Normalize** — fixed-size monospace, zero transforms. Canonical
+   viewing state. Always available, even when the gate is Closed.
+2. **CodeLock / Rosetta Render** — token-level font-size variance,
+   optional hue spectrum, micro-rotation, and spacing, driven by a
+   **deterministic seed**. Disabled when the gate is Closed.
+
+Opening the gate requires acknowledging the exact sentence:
+
+```
+This tool alters perception, not meaning.
+```
+
+Exports:
+
+- **Export Normal** — verbatim UTF-8 `.txt`. Canonical.
+- **Export CodeLock** — self-contained `.html` visual artifact, marked
+  non-canonical (`data-canonical="false"`, banner, HTML comment), with
+  the original source inspectable in
+  `<script type="text/plain" id="codelock-source">`. Opens as a file.
+  No CDN. Does not encrypt.
+
+## Install
+
+Python 3.10+. Stdlib only in the core (no numpy, no crypto).
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+From a release artifact:
+
+```bash
+python -m pip install codelock-0.1.0.tar.gz
+```
+
+## CLI
+
+```bash
+codelock gate-status
+
+codelock open-gate --ack "This tool alters perception, not meaning."
+
+# Canonical HTML view (no ack required)
+codelock render --in snippet.py --mode normalize --out snippet.normalize.html
+
+# CodeLock / Rosetta HTML (gate must be open for this invocation)
+codelock render --in snippet.py --mode codelock --out snippet.codelock.html \
+  --seed 7 --ack "This tool alters perception, not meaning."
+
+codelock render --in snippet.py --mode codelock --out nohue.html \
+  --seed 7 --no-hue --ack "This tool alters perception, not meaning."
+
+# Canonical .txt (byte-identical to source; no ack required)
+codelock export --in snippet.py --kind normal --out snippet.txt
+
+# Non-canonical HTML artifact
+codelock export --in snippet.py --kind codelock --out snippet.codelock.html \
+  --seed 7 --ack "This tool alters perception, not meaning."
+
+codelock version
+```
+
+`--ack` (or env `CODELOCK_ACK` set to the same phrase) opens the gate
+for that invocation. Default is Closed. Normalize and export-normal
+never need `--ack`.
+
+Library entry point:
+
+```python
+from codelock.session import CodeLockSession
+
+src = open("snippet.py", encoding="utf-8").read()
+session = CodeLockSession(src, seed=7, hue=True)
+html_n = session.normalize_html()          # always works
+session.open_gate("This tool alters perception, not meaning.")
+html_c = session.codelock_html()           # gate-checked
+session.export_normal("snippet.txt")
+session.export_codelock("snippet.codelock.html")
+assert session.source == src               # source never mutates
+```
+
+## Example
+
+No GUI required:
+
+```bash
+python examples/demo_snippet.py
+```
+
+That script opens the gate, writes Normalize HTML and CodeLock HTML
+under `examples/_out/`.
+
+## Tests
+
+```bash
+pip install -e ".[dev]"
+python -m pytest -q
+```
+
+Fixtures cover source immutability, token roundtrip, gate behavior,
+export identity, HTML non-canonical labels, seed determinism, hue off,
+Normalize (no size/rotation variance), and CLI.
+
+## Layout
+
+```
+codelock/           library (gate, tokenize, render, session, cli)
+tests/              pytest, no network, no GUI
+docs/whitepaper.md  July 2026 spec
+examples/           open the gate and write HTML
+workers/download-tracker/   Cloudflare Worker + wrangler.toml
+CONTRIBUTING.md     forks are first-class
+```
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).
+
+Forks are welcome and always allowed.
