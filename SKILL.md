@@ -5,13 +5,11 @@ description: Use when calling CodeLock hosted /v1 or installing the local packag
 
 # CodeLock
 
-Gate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.
+This tool alters perception, not meaning. Author: **Aziel Eliab**.
 
-**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.
+**THIS IS:** gate-tethered cognitive rendering of identical source text.
 
-**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.
-
-Author: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.
+**THIS IS NOT:** encryption, a compiler, or a claim that the transform is the source. Hosted `/v1` does not increment downloads or views.
 
 Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.
 
@@ -24,12 +22,9 @@ Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent
 
 Ops (do **not** increment downloads or views):
 
-| Method | Path | What |
-|--------|------|------|
-| GET | `/v1/health` | Liveness. Does not increment downloads. |
-| GET | `/v1/skill` | This markdown. Does not increment downloads. |
-| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |
-| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |
+- `GET /v1/health` — liveness
+- `GET /v1/skill` — this file
+- Product POSTs listed in OpenAPI
 
 Grok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.
 
@@ -38,9 +33,6 @@ Grok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.
 ```bash
 curl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health
 curl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill
-curl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \
-  -H 'content-type: application/json' \
-  -d '{"text":"sample"}'
 ```
 
 ## Local (after one-click install)
@@ -48,12 +40,12 @@ curl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.work
 ```bash
 curl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash
 codelock ui
+codelock doctor
 ```
 
 Then open http://127.0.0.1:8762 (loopback only).
 
-DOI: https://doi.org/10.5281/zenodo.21431561  
-Record: https://zenodo.org/records/21431561  
-
 Counted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/codelock
+
+Paper: DOI https://doi.org/10.5281/zenodo.21431561 · https://zenodo.org/records/21431561 · Apache-2.0. Forks welcome.
