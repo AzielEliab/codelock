@@ -75,6 +75,8 @@ function aiHowTo(base) {
 }
 
 const PRODUCT = "codelock";
+const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
+
 const VERSION = "0.1.0";
 const BASE = "https://codelock-download-tracker.vibelock.workers.dev";
 const ACK_PHRASE = "This tool alters perception, not meaning.";
@@ -389,6 +391,19 @@ export async function handleRuntime(request, url, env) {
       source_mutated: false,
     });
   }
+
+  if (path === "/v1/skill" && request.method === "GET") {
+    return new Response(SKILL_MARKDOWN, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Cache-Control": "private, no-store",
+        "X-KV-Increment": "false",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  }
+
   if (path === "/openapi.json" && request.method === "GET") {
     return runtimeJson(openapiDoc());
   }

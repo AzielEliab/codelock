@@ -13,6 +13,43 @@ How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Forks are welcome and always allowed.**
 
+
+## One-click install
+
+```bash
+curl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash
+```
+
+The script curls the **counted** tarball from this project's Worker
+(`/download`, User-Agent `Mozilla/5.0`), extracts, makes a venv, and
+`pip install -e .`. Then run `codelock ui`.
+
+Or tap **Download** / **One-click install** on the Worker homepage
+(a 6th-grader can tap it):
+https://codelock-download-tracker.vibelock.workers.dev/
+
+## Counted download (Cloudflare Worker)
+
+**This is the counted download.** GitHub releases exist as a mirror.
+The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
+
+# → [https://codelock-download-tracker.vibelock.workers.dev/](https://codelock-download-tracker.vibelock.workers.dev/) ←
+
+Direct tarball (also counted):
+[codelock-0.1.0.tar.gz](https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz)
+
+- Live count JSON: [https://codelock-download-tracker.vibelock.workers.dev/stats](https://codelock-download-tracker.vibelock.workers.dev/stats)
+- OpenAPI: [https://codelock-download-tracker.vibelock.workers.dev/openapi.json](https://codelock-download-tracker.vibelock.workers.dev/openapi.json)
+- Skill: [https://codelock-download-tracker.vibelock.workers.dev/v1/skill](https://codelock-download-tracker.vibelock.workers.dev/v1/skill)
+- One-click install: [https://codelock-download-tracker.vibelock.workers.dev/install.sh](https://codelock-download-tracker.vibelock.workers.dev/install.sh)
+- GitHub: [https://github.com/AzielEliab/codelock](https://github.com/AzielEliab/codelock)
+
+- DOI: [10.5281/zenodo.21431561](https://doi.org/10.5281/zenodo.21431561)
+- Zenodo: [https://zenodo.org/records/21431561](https://zenodo.org/records/21431561)
+
+Isolated counter: Worker `codelock-download-tracker`, KV `CODELOCK_DOWNLOADS`. Not mixed with any other product. `/v1` does not increment downloads.
+
+
 ## Quick start
 
 ```bash
