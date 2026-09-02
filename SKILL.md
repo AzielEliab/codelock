@@ -49,3 +49,18 @@ Counted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibe
 GitHub: https://github.com/AzielEliab/codelock
 
 Paper: DOI https://doi.org/10.5281/zenodo.21431561 · https://zenodo.org/records/21431561 · Apache-2.0. Forks welcome.
+
+## Catalog + local UI
+
+Author: **Aziel Eliab**. Honest scope: Canonical or Rosetta HTML view of source. Alters perception, not meaning.
+
+- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/codelock/
+- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
+- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- This Worker skill: `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`
+- This Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json
+- Sample payload: `GET https://codelock-download-tracker.vibelock.workers.dev/v1/example`
+
+Local UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `codelock doctor`.
+
+Grok: import catalog or Worker OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.

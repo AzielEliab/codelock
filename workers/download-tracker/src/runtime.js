@@ -75,7 +75,12 @@ function aiHowTo(base) {
 }
 
 const PRODUCT = "codelock";
-const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
+const EXAMPLE_PAYLOAD = {
+  "source": "print('hello')",
+  "mode": "normalize"
+};
+
+const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n\n## Catalog + local UI\n\nAuthor: **Aziel Eliab**. Honest scope: Canonical or Rosetta HTML view of source. Alters perception, not meaning.\n\n- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/codelock/\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- This Worker skill: `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n- This Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Sample payload: `GET https://codelock-download-tracker.vibelock.workers.dev/v1/example`\n\nLocal UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `codelock doctor`.\n\nGrok: import catalog or Worker OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n";
 
 const VERSION = "0.1.0";
 const BASE = "https://codelock-download-tracker.vibelock.workers.dev";
@@ -261,6 +266,7 @@ function openapiDoc() {
     },
     servers: [{ url: BASE }],
     paths: {
+            "/v1/example": { get: { operationId: "codelockExample", summary: "Sample JSON payload. Does not increment downloads.", responses: { "200": { description: "OK" } } } },
       "/v1/health": { get: { operationId: "codelockHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
       "/v1/gate-status": {
         post: {
@@ -383,7 +389,7 @@ export async function handleRuntime(request, url, env) {
   const path = url.pathname;
   if (path === "/v1/health" && request.method === "GET") {
     return runtimeJson({
-      ok: true,
+      ok: true, author: "Aziel Eliab",
       product: PRODUCT,
       version: VERSION,
       motto: MOTTO,
@@ -391,6 +397,16 @@ export async function handleRuntime(request, url, env) {
       source_mutated: false,
     });
   }
+  if ((path === "/v1/example" || path === "/v1/example/") && (request.method === "GET" || request.method === "HEAD")) {
+    return runtimeJson({
+      ok: true,
+      product: PRODUCT,
+      author: "Aziel Eliab",
+      example: EXAMPLE_PAYLOAD,
+      note: "Sample payload only. Does not increment downloads.",
+    });
+  }
+
 
   if (path === "/v1/skill" && request.method === "GET") {
     return new Response(SKILL_MARKDOWN, {
