@@ -97,6 +97,8 @@ def _build_parser() -> argparse.ArgumentParser:
         help=f"Exact phrase to open the gate: {ACK_PHRASE!r}",
     )
 
+    p_doc = sub.add_parser("doctor", help="Self-check: tokenize roundtrip, gate closed, loopback. No network.")
+    p_doc.add_argument("--json", action="store_true", dest="as_json", help="Print doctor results as JSON.")
     sub.add_parser("version", help="Print the CodeLock version and exit.")
 
     p_ui = sub.add_parser("ui", help="Run the localhost UI (127.0.0.1:8762).")
@@ -213,6 +215,11 @@ def _cmd_watch(args: argparse.Namespace) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+
+    if args.cmd == "doctor":
+        from codelock.doctor import doctor_cli
+
+        return doctor_cli(as_json=args.as_json)
 
     if args.cmd == "version":
         sys.stdout.write(f"codelock {__version__}\n")
