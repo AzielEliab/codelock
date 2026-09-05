@@ -45,10 +45,32 @@ function utcNow() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
+const AI_CLIENTS = [
+  "ChatGPT (GPT Actions / OpenAI)",
+  "Grok (xAI)",
+  "Venice",
+  "Claude (Anthropic)",
+  "Cursor (MCP)",
+  "Glama (MCP)",
+  "Perplexity",
+  "Microsoft Copilot / Bing",
+  "Google Gemini / Vertex",
+  "Mistral",
+  "Meta AI",
+  "Apple Intelligence surfaces",
+  "Amazon Q tooling",
+  "DuckAssist",
+  "You.com",
+  "Cohere",
+  "other MCP/OpenAPI-capable assistants",
+];
+
 function aiHowTo(base) {
   const openapi = base + "/openapi.json";
   const health = base + "/v1/health";
+  const mcp = "https://aziel-runtime.vibelock.workers.dev/mcp";
   return {
+    clients: AI_CLIENTS,
     chatgpt_actions: [
       "Open GPT Editor → Actions → Import from URL",
       "Paste " + openapi,
@@ -66,7 +88,16 @@ function aiHowTo(base) {
       "Start with GET " + health,
       "Then call the product POST listed in the spec",
     ],
-    mcp_catalog: "https://aziel-runtime.vibelock.workers.dev/mcp",
+    openapi_import: [
+      "Import " + openapi + " in Claude, Copilot, Gemini, Perplexity, Mistral, Meta AI, Amazon Q, Cohere, You.com, DuckAssist, and other OpenAPI-capable assistants",
+      "Authentication: None. CORS is *",
+      "Start with GET " + health,
+    ],
+    mcp_clients: [
+      "Cursor, Glama, and other MCP clients: POST " + mcp,
+      "Apple Intelligence surfaces and other MCP/OpenAPI-capable assistants can use the same OpenAPI or MCP catalog",
+    ],
+    mcp_catalog: mcp,
     notes: [
       "GET /download still serves the gzip tarball and increments the counter.",
       "/v1, /openapi.json, and /ai do not increment DOWNLOADS.",
@@ -75,7 +106,7 @@ function aiHowTo(base) {
 }
 
 const PRODUCT = "codelock";
-const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
+const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import OpenAPI as a custom tool, use GPT Actions, add an HTTP tool, or connect the MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
 
 const VERSION = "0.1.0";
 const BASE = "https://codelock-download-tracker.vibelock.workers.dev";
@@ -410,7 +441,7 @@ export async function handleRuntime(request, url, env) {
   if (path === "/ai" && request.method === "GET") {
     return runtimeJson({
       product: PRODUCT,
-      title: "Use with Grok, ChatGPT, Venice",
+      title: "Use with AI assistants",
       motto: MOTTO,
       openapi: BASE + "/openapi.json",
       health: BASE + "/v1/health",

@@ -237,7 +237,9 @@ CONTRIBUTING.md     forks are first-class
 mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
-## Use with Grok, ChatGPT, Venice
+## Use with AI assistants
+
+Works with any MCP- or OpenAPI-capable assistant, including ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 Live HTTPS runtime on the download-tracker Worker (does **not** increment the download counter):
 
@@ -253,6 +255,10 @@ POST /v1/gate-status and POST /v1/render {source, mode: normalize|codelock, ack}
 **Grok / xAI tools:** add an HTTP/OpenAPI tool pointing at `https://codelock-download-tracker.vibelock.workers.dev/openapi.json`.
 
 **Venice HTTP tools:** add an HTTP tool with method, URL, and JSON body from that spec. Start with GET `https://codelock-download-tracker.vibelock.workers.dev/v1/health`.
+
+**MCP (Cursor, Glama, and others):** `POST https://aziel-runtime.vibelock.workers.dev/mcp`.
+
+**OpenAPI import (Claude, Copilot, Gemini, Perplexity, and others):** import `https://codelock-download-tracker.vibelock.workers.dev/openapi.json` (no auth).
 
 ```bash
 curl -sS https://codelock-download-tracker.vibelock.workers.dev/v1/health
