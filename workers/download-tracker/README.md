@@ -20,6 +20,7 @@ CodeLock alters perception, not meaning. It is not encryption.
 | Binding     | Type | Purpose |
 |-------------|------|---------|
 | `DOWNLOADS` | KV   | Counters keyed `project|owner|repo|branch|fork` |
+| `AZIEL_RUNTIME` | service | Suite mesh `/v1/mesh/*` PROXY to aziel-runtime (HTTP fallback when unbound) |
 
 ## Deploy
 
@@ -103,8 +104,13 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 | Method | Path | Notes |
 |--------|------|-------|
 | GET | `/v1/health` | Liveness |
-| GET | `/openapi.json` | OpenAPI 3.1 |
+| GET | `/v1/mesh` · `/v1/mesh/status` | PROXY suite mesh status via `AZIEL_RUNTIME`. Default OFF. QNM-BUILD-1.0 live\|locked\|isolated. GET never enables. No Node Gate |
+| GET | `/v1/mesh/nodes` · `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` | PROXY Live Nodes / operator mesh door. Bearer required to enable |
+| GET | `/openapi.json` | OpenAPI 3.1 plus the mesh pointer |
+| GET | `/mcp` | Dual-surface MCP docs + FragGate pointer (`slug=codelock`) and mesh pointer (`fraggate_slug=mesh`, `enabled_default=false`) |
 | GET | `/ai` | Full AI client list plus OpenAPI/MCP import notes |
+
+`/v1/mesh/*` PROXY to aziel-runtime suite mesh (`AZIEL_RUNTIME`). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Human UI Live Nodes strip polls `GET /v1/mesh`.
 
 See the product README section **Use with AI assistants**.
 OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json

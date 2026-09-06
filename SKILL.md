@@ -1,6 +1,6 @@
 ---
 name: CodeLock
-description: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.
+description: Use when calling CodeLock hosted /v1 or installing the local package. Dual surface: Worker /v1 + GET /mcp, or aziel-runtime FragGate slug codelock. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Author Aziel Eliab.
 ---
 
 # CodeLock
@@ -24,9 +24,12 @@ Ops (do **not** increment downloads or views):
 
 - `GET /v1/health` — liveness
 - `GET /v1/skill` — this file
+- `GET /v1/mesh` — PROXY suite mesh status. Default OFF. QNM live|locked|isolated. Never enables.
+- `GET /v1/mesh/nodes` — PROXY Live Nodes roster (5-minute presence).
+- `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` — PROXY. Bearer required to enable. No auto-heal. Anon-broadcast is not a publish path.
 - Product POSTs listed in OpenAPI
 
-Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. This Worker `/v1/mesh/*` PROXY to aziel-runtime via AZIEL_RUNTIME. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.
 
 Import OpenAPI as a custom tool, use GPT Actions, add an HTTP tool, or connect the MCP catalog.
 
@@ -35,6 +38,7 @@ Import OpenAPI as a custom tool, use GPT Actions, add an HTTP tool, or connect t
 ```bash
 curl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health
 curl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill
+curl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/mesh
 ```
 
 ## Local (after one-click install)
@@ -45,7 +49,7 @@ codelock ui
 codelock doctor
 ```
 
-Then open http://127.0.0.1:8762 (loopback only).
+Then open http://127.0.0.1:8762 (loopback only). Worker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF). CLI `codelock doctor` remains a local self-check — not a FragGate live op. Suite mesh: `GET /v1/mesh` PROXY (default OFF). Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 
 Counted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/codelock

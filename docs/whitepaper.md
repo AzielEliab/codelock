@@ -197,6 +197,12 @@ extra.
 | Rosetta styles + HTML | `codelock.render` |
 | CLI | `codelock` (`gate-status`, `open-gate`, `render`, `export`, `version`) |
 
+The Worker homepage shows a suite Live Nodes strip. `/v1/fraggate/*`,
+`/v1/runtime/*`, and `/v1/mesh/*` PROXY to aziel-runtime. Suite mesh
+default OFF. QNM rollup is live|locked|isolated counts only. No Node
+Gate. No auto-heal. Not an anonymity network. Anon-broadcast is not a
+publish path. CodeLock remains a gate-tethered cognitive rendering tool.
+
 Forks are welcome and always allowed.
 
 This tool alters perception, not meaning.

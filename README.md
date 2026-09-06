@@ -41,13 +41,14 @@ Direct tarball (also counted):
 - Live count JSON: [https://codelock-download-tracker.vibelock.workers.dev/stats](https://codelock-download-tracker.vibelock.workers.dev/stats)
 - OpenAPI: [https://codelock-download-tracker.vibelock.workers.dev/openapi.json](https://codelock-download-tracker.vibelock.workers.dev/openapi.json)
 - Skill: [https://codelock-download-tracker.vibelock.workers.dev/v1/skill](https://codelock-download-tracker.vibelock.workers.dev/v1/skill)
+- Suite mesh proxy: [https://codelock-download-tracker.vibelock.workers.dev/v1/mesh](https://codelock-download-tracker.vibelock.workers.dev/v1/mesh) — default OFF; QNM live / locked / isolated
 - One-click install: [https://codelock-download-tracker.vibelock.workers.dev/install.sh](https://codelock-download-tracker.vibelock.workers.dev/install.sh)
 - GitHub: [https://github.com/AzielEliab/codelock](https://github.com/AzielEliab/codelock)
 
 - DOI: [10.5281/zenodo.21431561](https://doi.org/10.5281/zenodo.21431561)
 - Zenodo: [https://zenodo.org/records/21431561](https://zenodo.org/records/21431561)
 
-Isolated counter: Worker `codelock-download-tracker`, KV `CODELOCK_DOWNLOADS`. Not mixed with any other product. `/v1` does not increment downloads.
+Isolated counter: Worker `codelock-download-tracker`, KV `CODELOCK_DOWNLOADS`. Not mixed with any other product. `/v1`, `/mcp`, and `/v1/mesh/*` do not increment downloads.
 
 
 ## Quick start
@@ -247,6 +248,9 @@ Live HTTPS runtime on the download-tracker Worker (does **not** increment the do
 - Health: https://codelock-download-tracker.vibelock.workers.dev/v1/health
 - How to wire tools: https://codelock-download-tracker.vibelock.workers.dev/ai
 - MCP catalog: https://aziel-runtime.vibelock.workers.dev/mcp
+- Suite mesh PROXY: https://codelock-download-tracker.vibelock.workers.dev/v1/mesh — default OFF; QNM-BUILD-1.0 live|locked|isolated; no Node Gate
+
+Agents use this Worker `/v1` (gate-status / render) or OpenAPI/MCP via aziel-runtime. This Worker `/v1/mesh/*` PROXY via AZIEL_RUNTIME. Humans use the complete Worker UI (Download / One-click install plus Live Nodes strip). Dual surface: do not gut the human UI. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Anon-broadcast is not a publish path.
 
 POST /v1/gate-status and POST /v1/render {source, mode: normalize|codelock, ack}. Gate phrase (exact): `This tool alters perception, not meaning.` Without ack, CodeLock mode refuses. Source is never mutated. Not encryption.
 
