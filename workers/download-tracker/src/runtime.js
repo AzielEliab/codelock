@@ -2,12 +2,19 @@
  * CodeLock hosted runtime (Cloudflare Worker).
  * Ports gate + tokenize + Rosetta render from the Python core.
  * Source is never mutated. Not encryption.
+ * Door paths (`/v1/fraggate/*`, `/v1/runtime/*`, `/v1/mesh/*`) PROXY to aziel-runtime via AZIEL_RUNTIME.
+ * Local ops are single-segment `/v1/{op}` only.
+ * Author: Aziel Eliab only.
  */
+import { isMeshPath, runMeshProxy } from "./door.js";
+import { meshOpenApiPaths, meshPointer } from "./mesh.js";
+
 function runtimeCors() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Accept, Authorization, X-Aziel-Runtime-Token, MCP-Protocol-Version, mcp-session-id, User-Agent",
   };
 }
 
@@ -100,13 +107,14 @@ function aiHowTo(base) {
     mcp_catalog: mcp,
     notes: [
       "GET /download still serves the gzip tarball and increments the counter.",
-      "/v1, /openapi.json, and /ai do not increment DOWNLOADS.",
+      "/v1, /openapi.json, /ai, /mcp, and /v1/mesh/* do not increment DOWNLOADS.",
+      "Suite mesh GET /v1/mesh PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.",
     ],
   };
 }
 
 const PRODUCT = "codelock";
-const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import OpenAPI as a custom tool, use GPT Actions, add an HTTP tool, or connect the MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
+const SKILL_MARKDOWN = "---\nname: CodeLock\ndescription: Use when calling CodeLock hosted /v1 or installing the local package. Dual surface: Worker /v1 + GET /mcp, or aziel-runtime FragGate slug codelock. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Author Aziel Eliab.\n---\n\n# CodeLock\n\nGate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab.\n\n**THIS IS:** gate-tethered cognitive rendering of source text. It alters perception, not meaning.\n\n**THIS IS NOT:** a claim that meaning changed, a compiler, or a source-code rewriter of semantics.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://codelock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| GET | `/v1/mesh` | PROXY suite mesh status. Default OFF. QNM live\\|locked\\|isolated. Never enables. |\n| GET | `/v1/mesh/nodes` | PROXY Live Nodes roster (5-minute presence). |\n| POST | `/v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` | PROXY. Bearer required to enable. No auto-heal. Anon-broadcast is not a publish path. |\n| POST | `/v1/gate-status` | Gate status preview. Does not rewrite meaning. |\n| POST | `/v1/render` | Perception rendering. Does not claim meaning changed. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import OpenAPI as a custom tool, use GPT Actions, add an HTTP tool, or connect the MCP catalog. This Worker `/v1/mesh/*` PROXY to aziel-runtime via AZIEL_RUNTIME. Catalog MCP `mesh_*` + FragGate `slug=mesh`. Suite mesh default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' https://codelock-download-tracker.vibelock.workers.dev/v1/mesh\ncurl -s -A 'Mozilla/5.0' -X POST https://codelock-download-tracker.vibelock.workers.dev/v1/gate-status \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"sample\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://codelock-download-tracker.vibelock.workers.dev/install.sh | bash\ncodelock ui\n```\n\nThen open http://127.0.0.1:8762 (loopback only).\n\nWorker homepage Live Nodes strip polls `GET /v1/mesh` (default OFF). CLI `codelock doctor` remains a local self-check — not a FragGate live op.\n\nDOI: https://doi.org/10.5281/zenodo.21431561  \nRecord: https://zenodo.org/records/21431561  \n\nCounted download (gzip HTTP 200, no 302): https://codelock-download-tracker.vibelock.workers.dev/download?asset=codelock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/codelock\n";
 
 const VERSION = "0.1.0";
 const BASE = "https://codelock-download-tracker.vibelock.workers.dev";
@@ -288,11 +296,12 @@ function openapiDoc() {
       title: "CodeLock Runtime API",
       version: VERSION,
       summary: "Gate-tethered cognitive rendering of source text. Alters perception, not meaning. Not encryption.",
-      description: MOTTO + " Source is never mutated. CodeLock mode requires the exact gate phrase.",
+      description: MOTTO + " Source is never mutated. CodeLock mode requires the exact gate phrase. Suite mesh /v1/mesh/* PROXY to aziel-runtime (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Aziel Eliab only.",
     },
     servers: [{ url: BASE }],
     paths: {
       "/v1/health": { get: { operationId: "codelockHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
+      ...meshOpenApiPaths(),
       "/v1/gate-status": {
         post: {
           operationId: "codelockGateStatus",
@@ -410,8 +419,45 @@ async function handleRender(body) {
   });
 }
 
+function mcpDocs() {
+  return {
+    product: PRODUCT,
+    version: VERSION,
+    author: "Aziel Eliab",
+    identity: "Aziel Eliab",
+    motto: MOTTO,
+    catalog_mcp: "https://aziel-runtime.vibelock.workers.dev/mcp",
+    catalog_openapi: "https://aziel-runtime.vibelock.workers.dev/openapi.json",
+    worker_openapi: BASE + "/openapi.json",
+    agent_path: "https://aziel-runtime.vibelock.workers.dev/v1/fraggate/call",
+    mesh: meshPointer(),
+    mesh_body: { slug: "mesh", op: "status", payload: {} },
+    note: "GET docs here. Canonical agent path is the catalog MCP on aziel-runtime (FragGate slug codelock). Catalog MCP mesh_* + FragGate slug=mesh. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM rollup live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.",
+    kv_increment: false,
+    kernel: "https://github.com/AzielEliab/fraggate",
+  };
+}
+
 export async function handleRuntime(request, url, env) {
-  const path = url.pathname;
+  const path = url.pathname.replace(/\/+$/, "") || "/";
+
+  if (path === "/mcp") {
+    if (request.method === "GET" || request.method === "HEAD") {
+      if (request.method === "HEAD") {
+        return new Response(null, { status: 200, headers: runtimeCors() });
+      }
+      return runtimeJson(mcpDocs());
+    }
+  }
+
+  if (isMeshPath(path) || path === "/v1/mesh") {
+    const out = await runMeshProxy(env, request, path + (url.search || ""));
+    if (request.method === "HEAD") {
+      return new Response(null, { status: out.status, headers: runtimeCors() });
+    }
+    return runtimeJson(out.data, out.status);
+  }
+
   if (path === "/v1/health" && request.method === "GET") {
     return runtimeJson({
       ok: true,
@@ -420,6 +466,8 @@ export async function handleRuntime(request, url, env) {
       motto: MOTTO,
       encryption: false,
       source_mutated: false,
+      mesh: meshPointer(),
+      note: "Hosted /v1 does not increment downloads. Suite mesh /v1/mesh/* PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0. No Node Gate. No auto-heal.",
     });
   }
 
@@ -445,6 +493,7 @@ export async function handleRuntime(request, url, env) {
       motto: MOTTO,
       openapi: BASE + "/openapi.json",
       health: BASE + "/v1/health",
+      mesh: meshPointer(),
       ...aiHowTo(BASE),
     });
   }
@@ -452,7 +501,8 @@ export async function handleRuntime(request, url, env) {
     return runtimeJson({
       product: PRODUCT,
       motto: MOTTO,
-      endpoints: ["GET /v1/health", "POST /v1/gate-status", "POST /v1/render", "GET /openapi.json", "GET /ai"],
+      mesh: meshPointer(),
+      endpoints: ["GET /v1/health", "POST /v1/gate-status", "POST /v1/render", "GET /v1/mesh", "GET /openapi.json", "GET /ai", "GET /mcp"],
     });
   }
   if (path === "/v1/gate-status" && request.method === "POST") {
@@ -473,7 +523,12 @@ export async function handleRuntime(request, url, env) {
     return runtimeJson({ error: "method not allowed" }, 405);
   }
   if (path.startsWith("/v1/")) {
-    return runtimeJson({ error: "not found", product: PRODUCT }, 404);
+    return runtimeJson({
+      error: "not found",
+      product: PRODUCT,
+      hint: "GET /v1/health GET /v1/skill POST /v1/gate-status POST /v1/render GET /v1/mesh POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}",
+      mesh: meshPointer(),
+    }, 404);
   }
   return null;
 }

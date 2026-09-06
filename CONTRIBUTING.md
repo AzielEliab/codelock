@@ -42,6 +42,12 @@ No GUI.
 7. **Audit safety.** All outputs must stay inspectable with standard
    tools. HTML artifacts must work opened as a file (inline CSS, no
    CDN).
+8. **Door vs local op.** `/v1/fraggate/*`, `/v1/runtime/*`, and
+   `/v1/mesh/*` PROXY to aziel-runtime. Local ops are `/v1/{op}` only.
+   Never treat `fraggate/call` or `mesh/status` as a local op name.
+   Suite mesh default OFF; QNM rollup live|locked|isolated; no Node Gate;
+   no auto-heal; not anonymity.
+9. New behavior needs a test that fails without the change.
 
 ## Where to change things
 
@@ -50,7 +56,7 @@ No GUI.
 - Rosetta styles and HTML: `codelock/render.py`
 - Session / export: `codelock/session.py`
 - CLI: `codelock/cli.py`
-- New behavior needs a test that fails without the change.
+- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
 
 ## Reporting downloads from a fork
 
