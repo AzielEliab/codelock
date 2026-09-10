@@ -313,10 +313,10 @@ async function indexHtml(env) {
 <body>
   <h1>CodeLock</h1>
   <p class="motto">This tool alters perception, not meaning. Author Aziel Eliab.</p>
-  <p class="banner">Gate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab. Suite mesh: /v1/mesh/* PROXY (default OFF; QNM live|locked|isolated; no Node Gate; no auto-heal; not anonymity).</p>
+  <p class="banner">Gate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab. Suite mesh: /v1/mesh/* PROXY (default OFF; QNM live|locked|isolated; QNS-CD-1.0 cross-map only; no Node Gate; no public qnsd proxy; no auto-heal; not anonymity).</p>
   <div id="meshStrip" aria-label="Suite Live Nodes">
     <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
-    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.</div>
+    <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
     <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
     <div>No Node Gate · No auto-heal · Aziel Eliab only</div>
     <div>
@@ -326,7 +326,7 @@ async function indexHtml(env) {
       <button id="meshJoin" type="button" title="Join as codelock. Refused while mesh is OFF. No auto-join.">Join</button>
       <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
     </div>
-    <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate</div>
+    <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 cross-map · not qnsd proxy · not AnonBroadcast · not AZMail ring · not a Node Gate</div>
   </div>
   <div class="card">
     <div class="nums">

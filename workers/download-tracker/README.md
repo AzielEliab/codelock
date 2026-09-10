@@ -104,13 +104,13 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 | Method | Path | Notes |
 |--------|------|-------|
 | GET | `/v1/health` | Liveness |
-| GET | `/v1/mesh` · `/v1/mesh/status` | PROXY suite mesh status via `AZIEL_RUNTIME`. Default OFF. QNM-BUILD-1.0 live\|locked\|isolated. GET never enables. No Node Gate |
-| GET | `/v1/mesh/nodes` · `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` | PROXY Live Nodes / operator mesh door. Bearer required to enable |
+| GET | `/v1/mesh` · `/v1/mesh/status` | PROXY suite mesh status via `AZIEL_RUNTIME`. Default OFF. QNM-BUILD-1.0 live\|locked\|isolated. QNS-CD-1.0 cross-map on the payload. GET never enables. No Node Gate. No public qnsd proxy |
+| GET | `/v1/mesh/nodes` · `POST /v1/mesh/{enable,disable,join,heartbeat,leave,broadcast}` | PROXY Live Nodes / operator mesh door (QNS-CD-1.0 on GET roster). Bearer required to enable |
 | GET | `/openapi.json` | OpenAPI 3.1 plus the mesh pointer |
 | GET | `/mcp` | Dual-surface MCP docs + FragGate pointer (`slug=codelock`) and mesh pointer (`fraggate_slug=mesh`, `enabled_default=false`) |
 | GET | `/ai` | Full AI client list plus OpenAPI/MCP import notes |
 
-`/v1/mesh/*` PROXY to aziel-runtime suite mesh (`AZIEL_RUNTIME`). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. No auto-heal. Not anonymity. Human UI Live Nodes strip polls `GET /v1/mesh`.
+`/v1/mesh/*` PROXY to aziel-runtime suite mesh (`AZIEL_RUNTIME`). Default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (`qns_cd` on status / Live Nodes). Local qnsd lives in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites live in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime). Not a Softwares-tab product. No public qnsd proxy. No Node Gate. No auto-heal. Not anonymity. Human UI Live Nodes strip polls `GET /v1/mesh`.
 
 See the product README section **Use with AI assistants**.
 OpenAPI: https://codelock-download-tracker.vibelock.workers.dev/openapi.json

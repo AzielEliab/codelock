@@ -7,7 +7,7 @@
 import assert from "node:assert/strict";
 import { joinOriginUrl, runMeshProxy, SERVICE_BINDING_ORIGIN, HOST } from "../src/door.js";
 import { handleRuntime } from "../src/runtime.js";
-import { meshPointer } from "../src/mesh.js";
+import { meshPointer, QNS_CD_SPEC, QNS_CD } from "../src/mesh.js";
 
 const ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
 
@@ -18,6 +18,16 @@ assert.equal(meshPointer().enabled_default, false);
 assert.equal(meshPointer().node_gate, false);
 assert.equal(meshPointer().rollup, "live|locked|isolated");
 assert.equal(meshPointer().fraggate_slug, "mesh");
+assert.equal(meshPointer().qns_cd_spec, "QNS-CD-1.0");
+assert.equal(QNS_CD_SPEC, "QNS-CD-1.0");
+assert.equal(QNS_CD.public_qnsd_proxy, false);
+assert.equal(QNS_CD.softwares_tab, false);
+assert.equal(QNS_CD.node_gate, false);
+assert.equal(QNS_CD.default_off, true);
+assert.equal(QNS_CD.title, "photon QNS1 packet transfer");
+assert.ok(String(QNS_CD.local.repo).includes("AzielEliab/qnm-node"));
+assert.ok(String(QNS_CD.runtime.repo).includes("AzielEliab/aziel-runtime"));
+assert.match(meshPointer().note, /QNS-CD-1.0/);
 
 function jsonRes(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -89,10 +99,15 @@ assert.equal(meshHttp.status, 200);
 assert.equal(meshHttp.data.ok, true);
 assert.equal(meshHttp.data.enabled, false);
 assert.equal(meshHttp.data.code, "MESH-OK");
+assert.equal(meshHttp.data.qns_cd_spec, "QNS-CD-1.0");
+assert.equal(meshHttp.data.qns_cd.spec, "QNS-CD-1.0");
+assert.equal(meshHttp.data.qns_cd.public_qnsd_proxy, false);
+assert.equal(meshHttp.data.qns_cd.softwares_tab, false);
 
 const meshRoot = await worker("/v1/mesh", "GET");
 assert.equal(meshRoot.status, 200);
 assert.equal(meshRoot.data.enabled, false);
+assert.equal(meshRoot.data.qns_cd_spec, "QNS-CD-1.0");
 
 const enableEmpty = await worker("/v1/mesh/enable", "POST", {});
 assert.equal(enableEmpty.status, 400);
@@ -118,5 +133,7 @@ const mcp = await worker("/mcp", "GET");
 assert.equal(mcp.status, 200);
 assert.equal(mcp.data.mesh.fraggate_slug, "mesh");
 assert.equal(mcp.data.mesh.enabled_default, false);
+assert.equal(mcp.data.mesh.qns_cd_spec, "QNS-CD-1.0");
+assert.equal(mcp.data.mesh.qns_cd.public_qnsd_proxy, false);
 
 console.log("verify-mesh-proxy: GET /v1/mesh/status MESH-OK enabled:false");
