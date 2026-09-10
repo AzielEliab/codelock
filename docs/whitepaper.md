@@ -199,7 +199,9 @@ extra.
 
 The Worker homepage shows a suite Live Nodes strip. `/v1/fraggate/*`,
 `/v1/runtime/*`, and `/v1/mesh/*` PROXY to aziel-runtime. Suite mesh
-default OFF. QNM rollup is live|locked|isolated counts only. No Node
+default OFF. QNM rollup is live|locked|isolated counts only. QNS-CD-1.0
+(photon QNS1 packet transfer) is a hub cite / Worker mesh cross-map
+only — local qnsd is not hosted here and is not a public proxy. No Node
 Gate. No auto-heal. Not an anonymity network. Anon-broadcast is not a
 publish path. CodeLock remains a gate-tethered cognitive rendering tool.
 

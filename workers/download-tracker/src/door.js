@@ -9,6 +9,8 @@
  * Author: Aziel Eliab only.
  */
 
+import { QNS_CD_SPEC, withQnsCd } from "./mesh.js";
+
 export const DEFAULT_RUNTIME_ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
 export const SERVICE_BINDING_ORIGIN = "https://aziel-runtime";
 export const HOST = "https://codelock-download-tracker.vibelock.workers.dev";
@@ -200,12 +202,13 @@ export async function originFetch(env, pathAndQuery, init, request) {
 }
 
 function meshErrFields({ message, door_url, http_status, content_type, via, extra }) {
-  return {
+  return withQnsCd({
     ok: false,
     code: "MESH-ERR",
     door: "mesh",
     kernel: "mesh",
     spec: "QNM-BUILD-1.0",
+    qns_cd_spec: QNS_CD_SPEC,
     author: AUTHOR,
     identity: AUTHOR,
     node_gate: false,
@@ -217,7 +220,7 @@ function meshErrFields({ message, door_url, http_status, content_type, via, extr
     content_type: content_type || "",
     via: via || "",
     ...(extra || {}),
-  };
+  });
 }
 
 /**
@@ -348,6 +351,9 @@ export async function runMeshProxy(env, request, pathAndQuery) {
         extra: { preview },
       }),
     };
+  }
+  if (method === "GET" || method === "HEAD") {
+    return { status: res.status, data: withQnsCd(data) };
   }
   return { status: res.status, data };
 }

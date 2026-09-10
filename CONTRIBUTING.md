@@ -45,7 +45,8 @@ No GUI.
 8. **Door vs local op.** `/v1/fraggate/*`, `/v1/runtime/*`, and
    `/v1/mesh/*` PROXY to aziel-runtime. Local ops are `/v1/{op}` only.
    Never treat `fraggate/call` or `mesh/status` as a local op name.
-   Suite mesh default OFF; QNM rollup live|locked|isolated; no Node Gate;
+   Suite mesh default OFF; QNM rollup live|locked|isolated; QNS-CD-1.0
+   hub cite / Worker mesh cross-map only (no public qnsd proxy); no Node Gate;
    no auto-heal; not anonymity.
 9. New behavior needs a test that fails without the change.
 
@@ -56,7 +57,7 @@ No GUI.
 - Rosetta styles and HTML: `codelock/render.py`
 - Session / export: `codelock/session.py`
 - CLI: `codelock/cli.py`
-- Suite mesh / QNM Live Nodes: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
+- Suite mesh / QNM Live Nodes + QNS-CD-1.0 cross-map: `workers/download-tracker/src/mesh.js` (`/v1/mesh/*` PROXY to aziel-runtime).
 
 ## Reporting downloads from a fork
 
