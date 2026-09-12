@@ -5,6 +5,7 @@ Default OFF. live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,7 +94,11 @@ def test_home_rose_star_brandmark() -> None:
     assert "Everblooming" not in HOME
     sigil = ROOT / "workers/download-tracker/public/sigil.png"
     assert sigil.is_file()
-    assert sigil.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    data = sigil.read_bytes()
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    # Same official rose-star as chronolock / ark / forgereceipts (~75KB), not the 4KB pentagram.
+    assert len(data) == 75035
+    assert hashlib.sha256(data).hexdigest() == "af095e8b0916a7262860a53619c7110f25539988806775b1c7bff8df7b0ee848"
 
 
 def test_home_live_nodes_strip_no_node_gate() -> None:
