@@ -279,6 +279,8 @@ async function indexHtml(env) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CodeLock downloads — Aziel Eliab</title>
 <style>
+  .brandrow{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+  .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 0 0 1px #d4af3733}
   :root { color-scheme: dark; }
   body { font: 16px/1.45 system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem 4rem; background: #0e1014; color: #e8eaef; }
   h1 { font-size: 1.75rem; margin: 0 0 .35rem; }
@@ -311,6 +313,7 @@ async function indexHtml(env) {
   @media (max-width: 390px) { #meshStrip { font-size: .82rem; } #meshStrip input { width: 100%; } }
 </style>
 <body>
+  <div class="brandrow"><img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async"></div>
   <h1>CodeLock</h1>
   <p class="motto">This tool alters perception, not meaning. Author Aziel Eliab.</p>
   <p class="banner">Gate-tethered cognitive rendering of source text. Alters perception, not meaning. Does not claim the underlying meaning changed. Author: Aziel Eliab. Suite mesh: /v1/mesh/* PROXY (default OFF; QNM live|locked|isolated; QNS-CD-1.0 cross-map only; no Node Gate; no public qnsd proxy; no auto-heal; not anonymity).</p>

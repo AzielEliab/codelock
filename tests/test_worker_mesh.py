@@ -84,6 +84,18 @@ def test_runtime_advertises_mesh_proxy_and_pointer() -> None:
     assert "handleRuntime(request, url, env)" in INDEX
 
 
+def test_home_rose_star_brandmark() -> None:
+    mark = '<div class="brandrow"><img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async"></div>'
+    assert mark in HOME
+    assert ".brandrow{" in HOME
+    assert ".brandmark{" in HOME
+    assert "everblooming" not in HOME.lower()
+    assert "Everblooming" not in HOME
+    sigil = ROOT / "workers/download-tracker/public/sigil.png"
+    assert sigil.is_file()
+    assert sigil.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
 def test_home_live_nodes_strip_no_node_gate() -> None:
     assert 'id="meshStrip"' in HOME
     assert 'id="meshLiveCount"' in HOME
