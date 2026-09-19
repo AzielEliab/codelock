@@ -1,5 +1,12 @@
 import { handleRuntime } from "./runtime.js";
 import { corsHeaders as doorCors } from "./door.js";
+import { classifyRequest, readBotManagement } from "./classify.js";
+import {
+  isolatedKeys,
+  isReservedCounterKey,
+  shapeCountBody,
+  shapeHumanBotFields,
+} from "./stats-shape.js";
 
 /**
  * CodeLock download tracker (Cloudflare Worker).
@@ -16,6 +23,8 @@ import { corsHeaders as doorCors } from "./door.js";
  */
 
 const PROJECT = "codelock";
+const KEYS = isolatedKeys(PROJECT);
+
 const DEFAULT_ASSET = "codelock-0.1.0.tar.gz";
 const DEFAULT_OWNER = "AzielEliab";
 const DEFAULT_REPO = "codelock";
@@ -113,10 +122,56 @@ function githubAssetUrl(owner, repo, tag, asset) {
   return `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/releases/download/${encodeURIComponent(tag)}/${encodeURIComponent(asset)}`;
 }
 
-async function increment(env, dims) {
+
+async function bump(env, key) {
+  const n = parseInt((await env.DOWNLOADS.get(key)) || "0", 10) + 1;
+  await env.DOWNLOADS.put(key, String(n));
+  return n;
+}
+
+async function incrementSplit(env, humanKey, botKey, request) {
+  const cls = classifyRequest(request);
+  const splitKey = cls.bucket === "human" ? humanKey : botKey;
+  await bump(env, splitKey);
+  return cls;
+}
+
+async function readHumanBotSplit(env, request) {
+  const views = parseInt((await env.DOWNLOADS.get(KEYS.views)) || "0", 10) || 0;
+  const downloadsRaw = await env.DOWNLOADS.get(KEYS.total);
+  let downloads = parseInt(downloadsRaw || "0", 10);
+  if (!Number.isFinite(downloads) || downloads < 0) downloads = 0;
+  const viewsHuman = parseInt((await env.DOWNLOADS.get(KEYS.views_human)) || "0", 10) || 0;
+  const downloadsHuman = parseInt((await env.DOWNLOADS.get(KEYS.downloads_human)) || "0", 10) || 0;
+  const botManagementAvailable = readBotManagement(request).available;
+  return shapeHumanBotFields({
+    views,
+    downloads,
+    views_human: viewsHuman,
+    downloads_human: downloadsHuman,
+    botManagementAvailable,
+  });
+}
+
+function enrichStatsWithHumanBot(stats, split) {
+  return {
+    ...stats,
+    views_human: split.views_human,
+    views_bot: split.views_bot,
+    downloads_human: split.downloads_human,
+    downloads_bot: split.downloads_bot,
+    human: split.human,
+    bot: split.bot,
+    classification: split.classification,
+  };
+}
+
+async function increment(env, dims, request) {
   const key = kvKey(dims);
   const n = parseInt((await env.DOWNLOADS.get(key)) || "0", 10) + 1;
   await env.DOWNLOADS.put(key, String(n));
+  if (request) await incrementSplit(env, KEYS.downloads_human, KEYS.downloads_bot, request);
+
   return n;
 }
 
@@ -131,7 +186,7 @@ async function listAllKeys(env) {
   return keys;
 }
 
-async function collectStats(env) {
+async function collectStats(env, request) {
   const keys = await listAllKeys(env);
   let total = 0;
   const by_repo = {};
@@ -141,7 +196,7 @@ async function collectStats(env) {
 
   for (const k of keys) {
     const name = k.name;
-    if (name === viewsKey() || name === totalKey() || name === githubCacheKey()) continue;
+    if (isReservedCounterKey(name, PROJECT)) continue;
     const n = parseInt((await env.DOWNLOADS.get(name)) || "0", 10);
     if (!Number.isFinite(n) || n <= 0) continue;
     const parts = name.split("|");
@@ -157,7 +212,20 @@ async function collectStats(env) {
   }
 
   const views = parseInt((await env.DOWNLOADS.get(viewsKey())) || "0", 10) || 0;
+  const __hbViews = parseInt((await env.DOWNLOADS.get(KEYS.views)) || "0", 10) || 0;
+  const __hbViewsHuman = parseInt((await env.DOWNLOADS.get(KEYS.views_human)) || "0", 10) || 0;
+  const __hbDownloadsHuman = parseInt((await env.DOWNLOADS.get(KEYS.downloads_human)) || "0", 10) || 0;
+  const __hbBotMgmt = request ? readBotManagement(request).available : false;
+
   return {
+    ...shapeHumanBotFields({
+      views: (typeof views !== 'undefined' ? views : __hbViews),
+      downloads: (typeof downloads !== 'undefined' ? downloads : (typeof shown !== 'undefined' ? shown : (typeof total !== 'undefined' ? total : 0))),
+      views_human: __hbViewsHuman,
+      downloads_human: __hbDownloadsHuman,
+      botManagementAvailable: __hbBotMgmt,
+    }),
+
     project: PROJECT,
     total,
     views,
@@ -186,9 +254,11 @@ function githubCacheKey() {
   return PROJECT + "|__github__";
 }
 
-async function incrementViews(env) {
+async function incrementViews(env, request) {
   const n = parseInt((await env.DOWNLOADS.get(viewsKey())) || "0", 10) + 1;
   await env.DOWNLOADS.put(viewsKey(), String(n));
+  if (request) await incrementSplit(env, KEYS.views_human, KEYS.views_bot, request);
+
   return n;
 }
 
@@ -505,19 +575,19 @@ export default {
 
 
     if (url.pathname === "/" && request.method === "GET") {
-      await incrementViews(env);
+      await incrementViews(env, request);
       return new Response(await indexHtml(env), {
         headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders() },
       });
     }
 
     if (url.pathname === "/count" && request.method === "GET") {
-      const stats = await collectStats(env);
+      const stats = await collectStats(env, request);
       return json({ project: PROJECT, total: stats.total || 0 });
     }
 
     if (url.pathname === "/stats" && request.method === "GET") {
-      return json(await collectStats(env));
+      return json(await collectStats(env, request));
     }
 
     if (url.pathname === "/event" && request.method === "POST") {
@@ -528,7 +598,7 @@ export default {
         return json({ error: "JSON body required" }, 400);
       }
       const dims = parseDims(body || {});
-      const count = await increment(env, dims);
+      const count = await increment(env, dims, request);
       return json({
         ok: true,
         key: kvKey(dims),
@@ -545,7 +615,7 @@ export default {
       const dims = parseDims(url.searchParams);
       const asset = dims.asset || DEFAULT_ASSET;
       dims.asset = asset;
-      if (request.method === "GET") await increment(env, dims);
+      if (request.method === "GET") await increment(env, dims, request);
       return serveAsset(request, env, asset, { head: request.method === "HEAD" });
     }
 
@@ -556,7 +626,7 @@ export default {
       }
       const asset = dims.asset || DEFAULT_ASSET;
       dims.asset = asset;
-      if (request.method === "GET") await increment(env, dims);
+      if (request.method === "GET") await increment(env, dims, request);
       return serveAsset(request, env, asset, { head: request.method === "HEAD" });
     }
 
