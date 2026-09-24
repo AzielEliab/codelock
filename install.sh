@@ -27,6 +27,6 @@ python -m pip install -e .
 
 echo
 echo "Installed CodeLock."
-echo "Run:  codelock ui"
-echo "Then open http://127.0.0.1:8762  (loopback only)"
-echo "Author: Aziel Eliab."
+echo "1. codelock ui"
+echo "2. Open http://127.0.0.1:8762/"
+echo "Author: Aziel Eliab"

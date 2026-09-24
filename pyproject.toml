@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "codelock"
 version = "0.1.0"
-description = "Gate-tethered cognitive rendering: reversible view-layer transforms of identical source text (CodeLock, July 2026). Not encryption."
+description = "Gate-tethered cognitive rendering: reversible view-layer transforms of identical source text (CodeLock, July 2026)."
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [{name = "Aziel Eliab"}]

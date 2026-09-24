@@ -52,14 +52,32 @@ def run() -> dict[str, Any]:
     }
 
 
+_CHECK_LABELS = {
+    "version": "Version",
+    "tokenize_roundtrip": "Source round-trip",
+    "gate_default_closed": "Gate starts closed",
+    "ack_phrase": "Acknowledgment phrase",
+    "loopback": "Loopback only",
+    "telemetry": "Telemetry",
+}
+
+
 def format_report(payload: dict[str, Any]) -> str:
-    lines = [f"CodeLock doctor {payload.get('version')}"]
+    """Plain pass/fail lines. The JSON payload from ``run()`` stays unchanged."""
+    lines = [f"CodeLock doctor  {payload.get('version')}", ""]
     for c in payload.get("checks") or []:
-        mark = "ok" if c.get("ok") else "FAIL"
-        detail = f"  {c.get('detail')}" if c.get("detail") else ""
-        lines.append(f"{mark}  {c.get('id')}{detail}")
-    lines.append("doctor: healthy" if payload.get("ok") else "doctor: FAILED")
-    lines.append(str(payload.get("limitation") or ""))
+        mark = "pass" if c.get("ok") else "fail"
+        cid = str(c.get("id") or "")
+        name = _CHECK_LABELS.get(cid, cid)
+        detail = str(c.get("detail") or "")
+        if cid == "gate_default_closed":
+            detail = "Closed until you acknowledge the phrase."
+        elif cid == "telemetry":
+            detail = "Off." if c.get("ok") else detail
+        lines.append(f"{mark}  {name}  {detail}".rstrip())
+    lines.append("")
+    lines.append("doctor: healthy" if payload.get("ok") else "doctor: failed")
+    lines.append("Author: Aziel Eliab")
     return "\n".join(lines)
 
 

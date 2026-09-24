@@ -161,6 +161,98 @@ def test_cli_watch_file_shows_both_views(tmp_path, python_snippet, capsys) -> No
     assert "size=" in out
 
 
+def test_bare_command_welcomes(capsys) -> None:
+    assert main([]) == 0
+    out = capsys.readouterr().out
+    assert "codelock ui" in out
+    assert "Aziel Eliab" in out
+    assert "not encryption" not in out.lower()
+
+
+def test_bare_command_json(capsys) -> None:
+    assert main(["--json"]) == 0
+    payload = __import__("json").loads(capsys.readouterr().out)
+    assert payload["product"] == "codelock"
+    assert payload["version"] == __version__
+    assert "codelock ui" in payload["next"]
+
+
+def test_unknown_command_has_next_step(capsys) -> None:
+    assert main(["bogus"]) == 2
+    err = capsys.readouterr().err
+    assert 'Unknown command "bogus"' in err
+    assert "codelock --help" in err
+
+
+def test_render_missing_args_has_next_step(capsys) -> None:
+    assert main(["render"]) == 2
+    err = capsys.readouterr().err
+    assert "snippet.py" in err
+    assert "normalize" in err
+
+
+def test_missing_file_has_next_step(tmp_path: Path, capsys) -> None:
+    missing = tmp_path / "missing.py"
+    rc = main(
+        [
+            "render",
+            "--in",
+            str(missing),
+            "--mode",
+            "normalize",
+            "--out",
+            str(tmp_path / "out.html"),
+        ]
+    )
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "No file" in err
+    assert "Next:" in err
+
+
+def test_version_and_gate_status_json(capsys) -> None:
+    import json
+
+    assert main(["version", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["version"] == __version__
+    assert main(["--json", "gate-status"]) == 0
+    assert json.loads(capsys.readouterr().out) == {"gate": "closed"}
+
+
+def test_doctor_json_shape_unchanged(capsys) -> None:
+    import json
+
+    assert main(["doctor", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["product"] == "codelock"
+    assert payload["version"] == __version__
+    assert payload["ok"] is True
+    assert payload["limitation"].startswith("This tool alters perception, not meaning.")
+    assert [c["id"] for c in payload["checks"]] == [
+        "version",
+        "tokenize_roundtrip",
+        "gate_default_closed",
+        "ack_phrase",
+        "loopback",
+        "telemetry",
+    ]
+    assert main(["doctor"]) == 0
+    human = capsys.readouterr().out
+    assert "pass  Version" in human
+    assert "doctor: healthy" in human
+    assert "not encryption" not in human.lower()
+
+
+def test_help_is_short_and_has_examples() -> None:
+    from codelock.cli import _build_parser
+
+    text = _build_parser().format_help()
+    assert "examples:" in text
+    assert "not encryption" not in text.lower()
+    assert "changelog" not in text.lower()
+    assert len(text.splitlines()) < 80
+
+
 def test_cli_watch_stdin_without_ack_keeps_normalize(python_snippet, capsys) -> None:
     import io
 

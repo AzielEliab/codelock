@@ -26,6 +26,66 @@ def test_ui_rejects_non_loopback() -> None:
     assert "127.0.0.1" in LOOPBACK
 
 
+def test_ui_page_meets_human_layout() -> None:
+    from codelock.ui import PAGE
+
+    html = PAGE.lower()
+    assert "prefers-color-scheme" in html
+    assert ":focus-visible" in html
+    assert "#c9a227" in html
+    assert ">advanced<" in html
+    assert "not encryption" not in html
+    assert b"127.0.0.1".decode() in PAGE
+
+
+def test_ui_accept_json_and_render_shape() -> None:
+    import json
+
+    httpd = make_server("127.0.0.1", 0)
+    port = httpd.server_address[1]
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    try:
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/",
+            headers={"Accept": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        assert payload["ok"] is True
+        assert payload["name"] == "CodeLock"
+        assert payload["bind_host"] == "127.0.0.1"
+        body = json.dumps(
+            {"source": "print(1)\n", "seed": "1", "hue": True, "ack": ACK_PHRASE}
+        ).encode("utf-8")
+        post = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/render",
+            data=body,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+        )
+        with urllib.request.urlopen(post, timeout=5) as resp:
+            rendered = json.loads(resp.read().decode("utf-8"))
+        assert set(rendered) == {
+            "source",
+            "seed",
+            "hue",
+            "gate_open",
+            "normalize_html",
+            "codelock_html",
+            "styles",
+            "ack_phrase",
+            "warning",
+        }
+        assert rendered["gate_open"] is True
+        assert rendered["ack_phrase"] == ACK_PHRASE
+        assert rendered["codelock_html"]
+        assert rendered["styles"]
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+        thread.join(timeout=2)
+
+
 def test_ui_get_root_200_contains_codelock() -> None:
     httpd = make_server("127.0.0.1", 0)
     port = httpd.server_address[1]
