@@ -20,7 +20,9 @@ class CodeLockApp extends StatelessWidget {
     return MaterialApp(
       title: 'CodeLock',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      themeMode: ThemeMode.system,
       home: const CodeLockPage(),
     );
   }
@@ -35,26 +37,29 @@ class CodeLockPage extends StatefulWidget {
 
 class _CodeLockPageState extends State<CodeLockPage> {
   final _source = TextEditingController(
-    text: 'def greet(name):\n    return f"hello {name}"\n',
+    text: '',
   );
   final _ack = TextEditingController();
+  final _seedField = TextEditingController(text: '7');
   bool _codelock = false;
   bool _gateOpen = false;
-  String? _gateError;
-  final int _seed = 7;
+  bool _shown = false;
+  String? _notice;
 
   @override
   void dispose() {
     _source.dispose();
     _ack.dispose();
+    _seedField.dispose();
     super.dispose();
   }
+
+  int get _seed => int.tryParse(_seedField.text.trim()) ?? 7;
 
   void _openGate() {
     if (_ack.text.trim() != ackPhrase) {
       setState(() {
-        _gateError =
-            'Opening the gate requires the exact phrase: "$ackPhrase"';
+        _notice = 'That acknowledgment does not match. Enter: $ackPhrase';
         _gateOpen = false;
         _codelock = false;
       });
@@ -62,31 +67,48 @@ class _CodeLockPageState extends State<CodeLockPage> {
     }
     setState(() {
       _gateOpen = true;
-      _gateError = null;
+      _codelock = true;
+      _notice = 'Gate open for this session. Press Show view.';
     });
   }
 
-  void _closeGate() {
+  void _showView() {
+    if (_codelock && !_gateOpen) {
+      setState(() {
+        _shown = true;
+        _codelock = false;
+        _notice =
+            'CodeLock mode is closed. Open Advanced, enter the acknowledgment, then Show view again. Showing the plain view.';
+      });
+      return;
+    }
     setState(() {
-      _gateOpen = false;
-      _codelock = false;
-      _gateError = null;
+      _shown = true;
+      _notice = _codelock
+          ? 'CodeLock view. Same words, with size, color, and rotation.'
+          : 'Plain view. Fixed-size monospace.';
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('CodeLock')),
+      appBar: AppBar(
+        title: const Text('CodeLock'),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Center(child: Text('Aziel Eliab')),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(ackPhrase, style: const TextStyle(color: kGold, fontSize: 16)),
-          const SizedBox(height: 8),
-          const Text(
-            'This tool alters perception, not meaning. Not encryption. '
-            'Plain text is canonical. Rendered views never mutate source.',
-            style: TextStyle(color: kIvory),
+          Text(
+            'Paste a snippet and press Show view. The plain view is always available.',
+            style: TextStyle(color: scheme.onSurface, fontSize: 16, height: 1.4),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -94,70 +116,120 @@ class _CodeLockPageState extends State<CodeLockPage> {
             maxLines: 8,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
             decoration: const InputDecoration(
-              labelText: 'Paste source (canonical)',
+              labelText: 'Source',
               alignLabelWithHint: true,
             ),
           ),
-          const SizedBox(height: 12),
-          if (!_gateOpen) ...[
-            TextField(
-              controller: _ack,
-              decoration: const InputDecoration(
-                labelText: 'Acknowledge gate phrase to enable CodeLock',
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _showView,
+              child: const Text('Show view'),
+            ),
+          ),
+          if (_notice != null) ...[
+            const SizedBox(height: 12),
+            Text(_notice!, style: TextStyle(color: scheme.onSurface)),
+          ],
+          const SizedBox(height: 16),
+          if (_shown)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: _codelock && _gateOpen
+                    ? _CodeLockView(source: _source.text, seed: _seed)
+                    : SelectableText(
+                        _source.text.isEmpty ? 'Paste source, then Show view.' : _source.text,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 14,
+                          height: 1.45,
+                          color: scheme.onSurface,
+                        ),
+                      ),
               ),
             ),
-            const SizedBox(height: 8),
-            FilledButton(onPressed: _openGate, child: const Text('Open gate')),
-          ] else
-            OutlinedButton(onPressed: _closeGate, child: const Text('Close gate')),
-          if (_gateError != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(_gateError!, style: const TextStyle(color: Color(0xFFB54A4A))),
-            ),
-          const SizedBox(height: 12),
-          SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment(value: false, label: Text('Normalize')),
-              ButtonSegment(value: true, label: Text('CodeLock')),
-            ],
-            selected: {_codelock},
-            onSelectionChanged: (s) {
-              final want = s.first;
-              if (want && !_gateOpen) {
-                setState(() {
-                  _gateError =
-                      'CodeLock Mode is disabled while the gate is Closed. Normalize remains available.';
-                });
-                return;
-              }
-              setState(() {
-                _codelock = want;
-                _gateError = null;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _codelock ? 'NON-CANONICAL visual artifact — not a substitute for source.' : 'Canonical view (Normalize). Fixed-size monospace. Zero transforms.',
-            style: TextStyle(color: _codelock ? const Color(0xFFB54A4A) : kGoldDim),
-          ),
           const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: _codelock
-                  ? _CodeLockView(source: _source.text, seed: _seed)
-                  : SelectableText(
-                      _source.text,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 14,
-                        height: 1.45,
-                        letterSpacing: 0,
-                      ),
-                    ),
-            ),
+          ExpansionTile(
+            title: const Text('Advanced'),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            children: [
+              TextField(
+                controller: _ack,
+                decoration: const InputDecoration(
+                  labelText: 'Acknowledgment',
+                  helperText: ackPhrase,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (!_gateOpen)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilledButton.tonal(
+                    onPressed: _openGate,
+                    child: const Text('Open gate'),
+                  ),
+                )
+              else
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      setState(() {
+                        _gateOpen = false;
+                        _codelock = false;
+                        _notice = 'Gate closed. The plain view stays available.';
+                      });
+                    },
+                    child: const Text('Close gate'),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('CodeLock view'),
+                subtitle: Text(
+                  _gateOpen
+                      ? 'Show size, color, and rotation.'
+                      : 'Open the gate with the acknowledgment first.',
+                ),
+                value: _codelock && _gateOpen,
+                onChanged: (want) {
+                  if (want && !_gateOpen) {
+                    setState(() {
+                      _notice =
+                          'CodeLock mode is closed. Enter the acknowledgment, then try again.';
+                    });
+                    return;
+                  }
+                  setState(() => _codelock = want);
+                },
+              ),
+              TextField(
+                controller: _seedField,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Seed',
+                  helperText: 'Same seed, same CodeLock view. Default 7.',
+                ),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('About'),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: const [
+              Text(
+                'CodeLock shows one source as a plain view and as a CodeLock view. '
+                'The source text stays the same. Size, color, and rotation are presentation.',
+              ),
+              SizedBox(height: 8),
+              Text('Acknowledgment: $ackPhrase'),
+              SizedBox(height: 8),
+              Text('Author: Aziel Eliab · July 2026 · Offline'),
+            ],
           ),
         ],
       ),
@@ -173,6 +245,12 @@ class _CodeLockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = tokenize(source);
+    if (tokens.isEmpty) {
+      return Text(
+        'Paste source, then Show view.',
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      );
+    }
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.end,
       children: [

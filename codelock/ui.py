@@ -22,156 +22,251 @@ PAGE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>CodeLock</title>
 <style>
   :root {
-    --bg: #0f1419; --panel: #171e27; --ink: #e8edf2; --muted: #8b97a6;
-    --line: #2a3544; --gold: #d4bc6a; --focus: #7aa2d4; --bad: #d4534b;
+    color-scheme: light;
+    --bg: #f4f0e6;
+    --panel: #fffcf6;
+    --ink: #1a1814;
+    --muted: #5c564c;
+    --line: #e0d6c4;
+    --gold: #c9a227;
+    --bad: #8f2d2d;
+    --field: #fffcf6;
+    --iframe: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #12110e;
+      --panel: #1c1b17;
+      --ink: #f4efe6;
+      --muted: #c8bfb0;
+      --line: #3d382e;
+      --gold: #c9a227;
+      --bad: #f0a8a2;
+      --field: #14130f;
+      --iframe: #14130f;
+    }
   }
   * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0; background: var(--bg); color: var(--ink);
-    font-family: system-ui, "Segoe UI", sans-serif; line-height: 1.45;
+  html, body { margin: 0; padding: 0; max-width: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 1.75rem 1.25rem 3.5rem;
   }
-  body { max-width: 46rem; margin: 0 auto; padding: 2.1rem 1.2rem 4rem; }
-  .tag {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--muted);
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
   }
-  h1 { font-size: 2rem; font-weight: 650; letter-spacing: 0.04em; margin: 0.35rem 0 0.25rem; }
-  .motto { color: var(--gold); font-style: italic; margin: 0 0 0.85rem; font-size: 1.05rem; }
-  .lede { color: var(--muted); margin: 0 0 1.5rem; max-width: 40rem; }
-  fieldset {
-    border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
-    padding: 1.1rem 1.15rem 1.2rem; margin: 0 0 1rem;
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    margin: 0;
   }
-  legend {
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
-    padding: 0 0.4rem;
+  .ver { color: var(--muted); font-size: 0.85rem; font-weight: 500; margin-left: 0.4rem; }
+  .who { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .lede { margin: 0 0 1.25rem; max-width: 38rem; }
+  label { display: block; font-weight: 600; margin: 0.85rem 0 0.35rem; }
+  .hint { color: var(--muted); font-weight: 450; font-size: 0.92rem; margin: 0.35rem 0 0; }
+  textarea, input[type="text"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--field);
+    color: var(--ink);
+    font: inherit;
   }
-  label { display: block; font-size: 0.92rem; margin: 0.85rem 0 0.3rem; }
-  label .kicker {
-    display: block; font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 0.12rem;
+  textarea {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.92rem;
+    min-height: 10rem;
+    resize: vertical;
   }
-  textarea, input[type="text"], input[type="file"] {
-    width: 100%; padding: 0.55rem 0.65rem; border: 1px solid var(--line);
-    border-radius: 6px; background: #10161d; color: var(--ink); font: inherit;
+  input[type="file"] { max-width: 100%; }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0.85rem 0 0.3rem;
+    font-weight: 500;
   }
-  textarea:focus, input[type="text"]:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
-  textarea { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
-  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
-  .check { display: flex; align-items: center; gap: 0.45rem; margin: 0.85rem 0 0.3rem; font-size: 0.92rem; color: var(--muted); }
-  .check input { width: auto; }
-  .actions { display: flex; gap: 0.65rem; flex-wrap: wrap; margin: 0 0 1.6rem; }
+  .check input { width: 1rem; height: 1rem; }
+  button, summary {
+    font: inherit;
+  }
   button {
-    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem;
-    letter-spacing: 0.04em; padding: 0.65rem 1rem; border-radius: 8px;
-    border: 1px solid var(--ink); background: var(--ink); color: var(--bg);
-    cursor: pointer; font-weight: 650;
+    min-height: 44px;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
   }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.ghost { background: transparent; color: var(--ink); }
-  h2 {
-    font-size: 1.05rem; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); font-weight: 600; margin: 0 0 0.7rem;
+  button.primary {
+    background: var(--gold);
+    color: #1a1814;
+    font-weight: 650;
+    border-color: #a68516;
   }
+  button.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .actions { margin: 1rem 0 0.75rem; }
+  .status { margin: 0 0 1.25rem; color: var(--muted); }
+  .err { color: var(--bad); margin: 0 0 1rem; }
   .views { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
   .pane {
-    border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
-    padding: 0.85rem 1rem; min-height: 8rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    padding: 0.85rem 1rem 1rem;
   }
+  .pane h2 { font-size: 1rem; margin: 0 0 0.15rem; }
+  .pane-note { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.65rem; }
   .pane iframe {
-    width: 100%; min-height: 14rem; border: 0; background: #10161d; border-radius: 6px;
+    width: 100%;
+    min-height: 12rem;
+    border: 0;
+    border-radius: 8px;
+    background: var(--iframe);
   }
-  .err { color: var(--bad); margin: 0.5rem 0; }
-  footer { margin-top: 2rem; color: var(--muted); font-size: 0.88rem; }
-  .foot-note { font-style: italic; }
+  details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    padding: 0.35rem 1rem 0.85rem;
+    margin: 0.85rem 0 0;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 650;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; color: var(--gold); }
+  details[open] summary::before { content: "▾"; }
+  footer { margin-top: 2rem; color: var(--muted); font-size: 0.9rem; }
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  @media (max-width: 480px) {
+    body { padding: 1.1rem 0.9rem 2.5rem; }
+    .top { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+    h1 { font-size: 1.5rem; }
+    button.primary { width: 100%; }
+  }
 </style>
 </head>
 <body>
-  <header>
-    <div class="tag">CodeLock · __VERSION__ · loopback · not encryption</div>
-    <h1>CodeLock</h1>
-    <p class="motto">This tool alters perception, not meaning.</p>
-    <p class="lede">
-      Paste or load a short source snippet. Normalize is the canonical view.
-      CodeLock Mode is a view-layer renderer. It does not encrypt, hide, or replace source.
-      Bound to 127.0.0.1 only.
-    </p>
+  <header class="top">
+    <h1>CodeLock<span class="ver">__VERSION__</span></h1>
+    <p class="who">Aziel Eliab</p>
   </header>
+  <p class="lede">
+    Paste a snippet and press Render to see the plain view.
+    Open Advanced and enter the sentence
+    “This tool alters perception, not meaning.”
+    to see the CodeLock view of the same words.
+  </p>
 
   <form id="render-form" autocomplete="off">
-    <fieldset>
-      <legend>Source</legend>
-      <label for="source">
-        <span class="kicker">Snippet</span>
-        Canonical plain text. Rendered views never mutate this.
-      </label>
-      <textarea id="source" name="source" rows="8" placeholder="def greet(name):&#10;    return f'hello {name}'"></textarea>
-      <label for="load">
-        <span class="kicker">Load a file</span>
-        Read locally in the browser. Nothing is written to disk on the server.
-      </label>
-      <input id="load" type="file" accept=".py,.txt,.md,.js,.ts,.rs,.go,.c,.h,.html,.css,.json">
-      <div class="row">
-        <div>
-          <label for="seed"><span class="kicker">Seed</span> Deterministic Rosetta seed.</label>
-          <input id="seed" name="seed" type="text" value="0" spellcheck="false">
-        </div>
-        <div>
-          <label for="ack"><span class="kicker">Gate acknowledgment</span> Exact phrase required for CodeLock Mode.</label>
-          <input id="ack" name="ack" type="text" placeholder="This tool alters perception, not meaning." spellcheck="false">
-        </div>
-      </div>
-      <label class="check"><input id="hue" type="checkbox" checked> Hue spectrum on tokens</label>
-    </fieldset>
+    <label for="source">Source</label>
+    <textarea id="source" name="source" rows="8" placeholder="def greet(name):&#10;    return f'hello {name}'" spellcheck="false"></textarea>
     <div class="actions">
-      <button type="submit" id="run">Render views</button>
-      <button type="button" class="ghost" id="export" disabled>Export JSON styles</button>
+      <button type="submit" class="primary" id="run">Render</button>
     </div>
+    <p class="status" id="status" role="status">Paste source, then Render.</p>
+    <p class="err" id="err" role="alert" hidden></p>
+
+    <section class="views" aria-live="polite">
+      <article class="pane">
+        <h2>Normalize</h2>
+        <p class="pane-note">Plain view of the source.</p>
+        <iframe id="before" title="Normalize view" sandbox></iframe>
+      </article>
+      <article class="pane">
+        <h2>CodeLock</h2>
+        <p class="pane-note" id="after-note">Same words, after the gate is open.</p>
+        <iframe id="after" title="CodeLock view" sandbox></iframe>
+      </article>
+    </section>
+
+    <details class="advanced">
+      <summary>Advanced</summary>
+      <label for="load">Load a file <span class="hint">Read in the browser. The server does not store it.</span></label>
+      <input id="load" type="file" accept=".py,.txt,.md,.js,.ts,.rs,.go,.c,.h,.html,.css,.json">
+      <label for="seed">Seed</label>
+      <input id="seed" name="seed" type="text" value="0" spellcheck="false">
+      <p class="hint">Same seed, same CodeLock view.</p>
+      <label class="check" for="hue"><input id="hue" type="checkbox" checked> Color the tokens</label>
+      <label for="ack">Acknowledgment</label>
+      <input id="ack" name="ack" type="text" placeholder="This tool alters perception, not meaning." spellcheck="false" autocomplete="off">
+      <p class="hint">The phrase must match exactly. It opens CodeLock mode for this render only. This page stays on 127.0.0.1.</p>
+      <div class="actions">
+        <button type="button" class="ghost" id="export" disabled>Export style JSON</button>
+      </div>
+    </details>
   </form>
 
-  <section class="views" aria-live="polite">
-    <div class="pane">
-      <h2>Before — Normalize (canonical)</h2>
-      <iframe id="before" title="Canonical normalize view" sandbox></iframe>
-    </div>
-    <div class="pane">
-      <h2>After — CodeLock Mode (non-canonical)</h2>
-      <iframe id="after" title="CodeLock view-layer renderer" sandbox></iframe>
-    </div>
-  </section>
-  <p class="err" id="err" hidden></p>
+  <details>
+    <summary>About</summary>
+    <p>CodeLock shows one source as a plain view and as a CodeLock view. The source text stays the same. Size, color, and rotation are presentation.</p>
+    <p>Acknowledgment: This tool alters perception, not meaning.</p>
+    <p>Author: Aziel Eliab · July 2026 · Bound to 127.0.0.1 · <code>codelock ui</code></p>
+    <p class="hint"><code>codelock doctor</code> checks the install. <code>codelock --help</code> lists commands.</p>
+  </details>
 
   <footer>
-    <p>Apache-2.0 · Aziel Eliab · July 2026 · Bound to 127.0.0.1 · <code>codelock ui</code></p>
-    <p class="foot-note">This tool alters perception, not meaning. Forks welcome and always allowed.</p>
+    <p>Aziel Eliab · July 2026 · 127.0.0.1</p>
   </footer>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
   let last = null;
+  function placeholder(text) {
+    return "<!DOCTYPE html><meta charset='utf-8'><style>body{margin:0;font:15px/1.45 system-ui,sans-serif;padding:1rem 1.1rem}</style><p>" + text + "</p>";
+  }
+  $("before").srcdoc = placeholder("Render to see the plain view.");
+  $("after").srcdoc = placeholder("Render to see the CodeLock view.");
   $("load").addEventListener("change", () => {
-    const f = $("load").files[0];
+    const f = $("load").files && $("load").files[0];
     if (!f) return;
     const r = new FileReader();
     r.onload = () => { $("source").value = String(r.result || ""); };
     r.readAsText(f);
   });
   function fail(msg) { $("err").hidden = false; $("err").textContent = msg; }
+  function status(msg) { $("status").textContent = msg; }
   $("render-form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     $("err").hidden = true;
     $("run").disabled = true;
+    status("Rendering…");
     try {
       const res = await fetch("/api/render", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {"Content-Type": "application/json", "Accept": "application/json"},
         body: JSON.stringify({
           source: $("source").value,
           seed: $("seed").value || "0",
@@ -180,18 +275,34 @@ PAGE = r"""<!DOCTYPE html>
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+      if (!res.ok) throw new Error(data.error || ("Request failed (HTTP " + res.status + ")."));
       last = data;
       $("before").srcdoc = data.normalize_html || "";
-      $("after").srcdoc = data.codelock_html || "<p style='font-family:system-ui;color:#8b97a6;padding:1rem'>Gate closed. Acknowledge the phrase to render CodeLock Mode.</p>";
+      if (data.codelock_html) {
+        $("after").srcdoc = data.codelock_html;
+        $("after-note").textContent = "Same words, with size, color, and rotation.";
+        status("Both views are ready.");
+      } else {
+        $("after").srcdoc = placeholder("CodeLock mode is closed. Open Advanced, enter the acknowledgment, and Render again.");
+        $("after-note").textContent = "Closed until you acknowledge the phrase.";
+        status("Plain view is ready. CodeLock mode is closed — open Advanced, enter the acknowledgment, and Render again.");
+      }
       $("export").disabled = !(data.styles && data.styles.length);
-      if (data.warning) fail(data.warning);
-    } catch (e) { fail(String(e.message || e)); }
-    finally { $("run").disabled = false; }
+      if (data.warning) {
+        fail(data.warning + " Next: enter the acknowledgment exactly, then Render again.");
+      }
+    } catch (e) {
+      fail(String(e.message || e) + " Next: check the snippet and try Render again.");
+    } finally {
+      $("run").disabled = false;
+    }
   });
   $("export").addEventListener("click", () => {
-    if (!last) return;
-    const blob = new Blob([JSON.stringify({source: last.source, seed: last.seed, styles: last.styles}, null, 2)], {type: "application/json"});
+    if (!last || !last.styles) return;
+    const blob = new Blob(
+      [JSON.stringify({source: last.source, seed: last.seed, styles: last.styles}, null, 2)],
+      {type: "application/json"}
+    );
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "codelock-styles.json";
@@ -220,6 +331,13 @@ class Handler(BaseHTTPRequestHandler):
     def _json(self, code: int, obj: Any) -> None:
         self._send(code, json.dumps(obj).encode("utf-8"), "application/json; charset=utf-8")
 
+    def _wants_json(self) -> bool:
+        accept = (self.headers.get("Accept") or "").lower()
+        if "text/html" in accept:
+            return False
+        parts = [part.split(";", 1)[0].strip() for part in accept.split(",")]
+        return "application/json" in parts
+
     def _read_json(self) -> dict[str, Any]:
         length = int(self.headers.get("Content-Length") or 0)
         if length > MAX_BODY:
@@ -233,6 +351,18 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
+            if self._wants_json():
+                self._json(
+                    200,
+                    {
+                        "ok": True,
+                        "name": "CodeLock",
+                        "version": __version__,
+                        "bind_host": DEFAULT_HOST,
+                        "author": "Aziel Eliab",
+                    },
+                )
+                return
             self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
             return
         if path == "/health":
@@ -288,8 +418,7 @@ def make_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> Threading
 
 def serve(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     httpd = make_server(host, port)
-    sys.stdout.write(f"CodeLock UI  http://{host}:{port}/\n")
-    sys.stdout.write("Local only. This tool alters perception, not meaning.\n")
+    sys.stdout.write(f"Open http://{host}:{port}/\n")
     sys.stdout.flush()
     try:
         httpd.serve_forever()

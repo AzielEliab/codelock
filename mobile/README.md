@@ -1,36 +1,35 @@
-# CodeLock — iPhone & Android
+# CodeLock — iPhone and Android
 
-Paste source, toggle Normalize vs CodeLock. Gate phrase is on the page. CodeLock mode needs the exact acknowledgment. Source never mutates. Offline.
+Paste source and press Show view. The plain view is always available. CodeLock mode asks for the acknowledgment under Advanced. The source text stays the same. Offline.
 
-Offline. No analytics. Dark matte / gold.
+Author: Aziel Eliab
 
 Application id: `com.azieeliab.codelock`
 
-## Open in Android Studio / Xcode
+## Start
 
-The `android/` and `ios/` folders here are skeleton READMEs because
-this tree was written without the Flutter SDK on PATH.
+1. Generate the platform folders and install packages:
 
 ```bash
 cd mobile
 flutter create --org com.azieeliab --project-name codelock .
 flutter pub get
+```
+
+2. Run the app:
+
+```bash
 flutter run
 ```
 
-Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in
-Xcode.
+3. Paste a snippet and press **Show view**.
 
-## Honest scope
+The `android/` and `ios/` folders in this tree are skeleton READMEs until `flutter create .` runs. Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in Xcode.
 
-Not encryption, not obfuscation of secrets, not a cipher. Plain text stays canonical.
+## About
 
-## Desktop package (counted download)
+Plain text stays the source. Size, color, and rotation are presentation. Acknowledgment: `This tool alters perception, not meaning.`
 
-This phone app does not replace the desktop package.
+Desktop package: https://github.com/AzielEliab/codelock
 
-# → https://codelock-download-tracker.vibelock.workers.dev/ ←
-
-GitHub: https://github.com/AzielEliab/codelock
-
-**Forks are welcome and always allowed.**
+Forks are welcome and always allowed.

@@ -1,0 +1,10 @@
+CodeLock — first run
+
+Author: Aziel Eliab
+
+1. python3 -m venv .venv && . .venv/bin/activate && python -m pip install -e .
+2. codelock ui
+3. Open http://127.0.0.1:8762/
+
+Paste a snippet and press Render.
+codelock doctor checks the install. codelock --help lists commands.
