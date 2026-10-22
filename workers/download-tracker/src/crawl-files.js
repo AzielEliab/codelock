@@ -2,8 +2,8 @@
  * Crawl files for the CodeLock download tracker: /llms.txt, /cite.json and /sitemap.xml.
  * Generated from facts already in this Worker (index.js constants, the
  * homepage meta description, and the routes this Worker serves). No new
- * claims. The Zenodo DOI is historical: the record was removed by Zenodo on
- * 2026-09-02 and doi.org returns HTTP 410, so it is printed as text only.
+ * claims. The Zenodo DOI is historical: Zenodo record removed (2026-09-02),
+ * so it is printed as text only.
  */
 
 export const CRAWL_META = Object.freeze({
@@ -77,7 +77,7 @@ export function llmsTxt(meta = CRAWL_META) {
   lines.push("Catalog MCP: POST https://aziel-runtime.vibelock.workers.dev/mcp");
   if (meta.doi) {
     lines.push("");
-    lines.push("Historical DOI: " + meta.doi + " (Zenodo record removed " + meta.doi_removed + "; doi.org returns HTTP 410. Not a live record.)");
+    lines.push("Historical DOI: " + meta.doi + " (Zenodo record removed (" + meta.doi_removed + "). Not a live record.)");
   }
   lines.push("");
   return lines.join("\n");
@@ -93,7 +93,7 @@ export function citeDoc(meta = CRAWL_META) {
     homepage: meta.host + "/",
     download: meta.host + "/download",
     doi: meta.doi,
-    doi_status: meta.doi ? "historical: Zenodo record removed " + meta.doi_removed + "; doi.org returns HTTP 410" : null,
+    doi_status: meta.doi ? "historical: Zenodo record removed (" + meta.doi_removed + ")" : null,
     license: "Apache-2.0",
     catalog: "https://aziel-runtime.vibelock.workers.dev/",
     llms: meta.host + "/llms.txt",
